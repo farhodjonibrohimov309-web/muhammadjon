@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>FAST MARKET — Tezkor Yetkazib Berish va Online Market</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Leaflet Map CSS (OpenStreetMap) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="./styl.css" />
+</head>
+<body>
+  <!-- Offline Banner -->
+  <div id="offlineBanner" class="offline-banner hidden" role="alert">
+    <i class="fa-solid fa-wifi"></i>
+    <span>Internet aloqasi uzildi! Ba'zi funksiyalar kesh (LocalStorage) orqali ishlamoqda.</span>
+  </div>
+
+  <!-- Top Utility Bar -->
+  <div class="top-utility-bar">
+    <div class="container utility-inner">
+      <div class="utility-left">
+        <span class="delivery-badge">
+          <i class="fa-solid fa-bolt"></i> Tezkor yetkazib berish: <strong>25–45 daqiqa</strong>
+        </span>
+        <span class="utility-divider">|</span>
+        <button type="button" class="utility-link" data-open-modal="deliveryInfoModal">
+          <i class="fa-solid fa-truck-fast"></i> Yetkazib berish shartlari
+        </button>
+        <button type="button" class="utility-link" data-open-modal="aboutModal">
+          <i class="fa-solid fa-circle-info"></i> Biz haqimizda
+        </button>
+        <button type="button" class="utility-link" data-open-modal="faqModal">
+          <i class="fa-solid fa-circle-question"></i> FAQ
+        </button>
+        <button type="button" class="utility-link" data-open-modal="contactModal">
+          <i class="fa-solid fa-headset"></i> Aloqa
+        </button>
+      </div>
+      <div class="utility-right">
+        <span class="bonus-pill" id="headerBonusPill" title="Bonus ballaringiz">
+          <i class="fa-solid fa-coins"></i> <span id="headerBonusPoints">0</span> ball
+        </span>
+        <button type="button" class="utility-link" id="openReferralBtn">
+          <i class="fa-solid fa-user-plus"></i> Referral
+        </button>
+        <button type="button" class="utility-link admin-trigger-btn" id="openAdminBtn">
+          <i class="fa-solid fa-shield-halved"></i> Admin Panel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Sticky Header -->
+  <header class="main-header" id="mainHeader">
+    <div class="container header-inner">
+      <!-- Brand Logo -->
+      <a href="#home" class="brand-logo" id="logoLink" aria-label="FAST MARKET bosh sahifa">
+        <div class="logo-mark">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span class="logo-bolt"><i class="fa-solid fa-bolt"></i></span>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title">FAST <span>MARKET</span></span>
+          <span class="logo-sub">FOOD &amp; MARKETPLACE</span>
+        </div>
+      </a>
+
+      <!-- Catalog Button -->
+      <button type="button" class="catalog-btn" id="catalogToggleBtn" aria-expanded="false">
+        <i class="fa-solid fa-border-all"></i>
+        <span>Katalog</span>
+      </button>
+
+      <!-- Live Search Bar -->
+      <div class="search-wrapper" id="searchWrapper">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input
+            type="text"
+            id="globalSearchInput"
+            class="search-input"
+            placeholder="Burger, lavash, pizza, sut, smartfon yoki kategoriya qidiring..."
+            autocomplete="off"
+          />
+          <button type="button" id="clearSearchBtn" class="clear-search-btn hidden" title="Qidiruvni tozalash" aria-label="Qidiruvni tozalash">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <button type="button" id="searchSubmitBtn" class="search-submit-btn">Qidirish</button>
+        </div>
+
+        <!-- Live Search Dropdown -->
+        <div class="search-dropdown hidden" id="searchDropdown"></div>
+      </div>
+
+      <!-- Header Actions -->
+      <div class="header-actions">
+        <!-- Theme Switcher -->
+        <button type="button" class="icon-action-btn" id="themeToggleBtn" title="Mavzuni o'zgartirish (Light/Dark)" aria-label="Mavzuni o'zgartirish">
+          <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </button>
+
+        <!-- Compare -->
+        <button type="button" class="icon-action-btn" id="openCompareBtn" title="Mahsulotlarni solishtirish" aria-label="Solishtirish">
+          <i class="fa-solid fa-scale-balanced"></i>
+          <span class="action-badge hidden" id="compareBadge">0</span>
+        </button>
+
+        <!-- Notifications -->
+        <div class="notif-wrapper">
+          <button type="button" class="icon-action-btn" id="notifToggleBtn" title="Bildirishnomalar" aria-label="Bildirishnomalar">
+            <i class="fa-regular fa-bell"></i>
+            <span class="action-badge" id="notifBadge">0</span>
+          </button>
+          <div class="notif-dropdown hidden" id="notifDropdown">
+            <div class="notif-header">
+              <h4>Bildirishnomalar</h4>
+              <button type="button" id="markAllReadBtn" class="text-btn">Barchasini o'qilgan qilish</button>
+            </div>
+            <div class="notif-list" id="notifList"></div>
+          </div>
+        </div>
+
+        <!-- Wishlist -->
+        <button type="button" class="icon-action-btn" id="openWishlistBtn" title="Sevimlilar" aria-label="Sevimlilar">
+          <i class="fa-regular fa-heart"></i>
+          <span class="action-badge hidden" id="wishlistBadge">0</span>
+        </button>
+
+        <!-- Orders Tracker -->
+        <button type="button" class="icon-action-btn" id="openOrdersBtn" title="Buyurtmalarim" aria-label="Buyurtmalarim">
+          <i class="fa-solid fa-box-open"></i>
+          <span class="action-badge hidden" id="ordersBadge">0</span>
+        </button>
+
+        <!-- Profile -->
+        <button type="button" class="profile-pill-btn" id="openProfileBtn">
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120&q=80" alt="Profil" id="headerProfileAvatar" class="mini-avatar" />
+          <span id="headerProfileName">Profil</span>
+        </button>
+
+        <!-- Cart Button -->
+        <button type="button" class="cart-pill-btn" id="openCartBtn">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="cart-label">Savat</span>
+          <span class="cart-count-badge" id="cartBadge">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Category Ribbon -->
+    <nav class="category-ribbon" aria-label="Mahsulot kategoriyalari">
+      <div class="container ribbon-inner" id="categoryRibbon"></div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content" id="mainContent">
+    <div class="container">
+      <!-- Hero Banner Slider + Flash Sale Sidebar -->
+      <section class="hero-section" aria-label="Asosiy bannerlar va kunlik aksiya">
+        <div class="hero-slider-card">
+          <div class="hero-slides" id="heroSlides"></div>
+          <button type="button" class="slider-arrow prev" id="heroPrevBtn" aria-label="Oldingi banner">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <button type="button" class="slider-arrow next" id="heroNextBtn" aria-label="Keyingi banner">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+          <div class="hero-dots" id="heroDots"></div>
+        </div>
+
+        <!-- Flash Sale Widget -->
+        <aside class="flash-sale-card" id="flashSaleCard">
+          <div class="flash-header">
+            <div class="flash-title">
+              <span class="fire-badge"><i class="fa-solid fa-fire-flame-curved"></i> FLASH SALE</span>
+              <h3>Kunlik Mega Chegirma</h3>
+            </div>
+            <div class="countdown-box" id="flashCountdown">
+              <div class="time-unit"><span id="cdHours">03</span><small>soat</small></div>
+              <span class="time-sep">:</span>
+              <div class="time-unit"><span id="cdMinutes">45</span><small>daq</small></div>
+              <span class="time-sep">:</span>
+              <div class="time-unit"><span id="cdSeconds">18</span><small>son</small></div>
+            </div>
+          </div>
+          <div class="flash-product-box" id="flashSaleProductBox"></div>
+        </aside>
+      </section>
+
+      <!-- Value Propositions Strip -->
+      <section class="benefits-strip" aria-label="Afzalliklar">
+        <div class="benefit-item">
+          <i class="fa-solid fa-motorcycle"></i>
+          <div>
+            <strong>30 daqiqalik Fast Delivery</strong>
+            <span>Issiq taomlar va mahsulotlar eshikgacha</span>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <i class="fa-solid fa-percent"></i>
+          <div>
+            <strong>Har kuni 50% gacha aksiya</strong>
+            <span>Promokodlar va kunlik takliflar</span>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <i class="fa-solid fa-award"></i>
+          <div>
+            <strong>100% Sifat Kafolati</strong>
+            <span>Sertifikatlangan brendlar va yangi mahsulotlar</span>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <i class="fa-solid fa-coins"></i>
+          <div>
+            <strong>Cashback &amp; Bonus Ballar</strong>
+            <span>Har bir xariddan ball yig'ing va tejang</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Categories Grid Section -->
+      <section class="page-section" id="categoriesSection">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><i class="fa-solid fa-layer-group"></i> Kategoriyalar</h2>
+            <p class="section-subtitle">Fast Fooddan tortib elektronikagacha — barchasi bir joyda</p>
+          </div>
+          <button type="button" class="link-btn" id="resetFiltersBtn">Barcha mahsulotlarni ko'rish <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+        <div class="categories-grid" id="categoriesGrid"></div>
+      </section>
+
+      <!-- Discounts Carousel Section -->
+      <section class="page-section" id="discountsSection">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><i class="fa-solid fa-tags"></i> Chegirmalar Karuseli</h2>
+            <p class="section-subtitle">Eng yuqori chegirmali maxsus takliflar</p>
+          </div>
+          <div class="carousel-controls">
+            <button type="button" class="circle-nav-btn" id="discPrevBtn" aria-label="Oldingi chegirmalar">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button type="button" class="circle-nav-btn" id="discNextBtn" aria-label="Keyingi chegirmalar">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+        <div class="horizontal-carousel" id="discountsCarousel"></div>
+      </section>
+
+      <!-- Filter & Sort Bar + Filtered/Main Catalog -->
+      <section class="page-section" id="catalogSection">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title" id="catalogSectionTitle"><i class="fa-solid fa-store"></i> Mashhur Mahsulotlar</h2>
+            <p class="section-subtitle" id="catalogResultCount">Mahsulotlar yuklanmoqda...</p>
+          </div>
+          <div class="active-filter-chips" id="activeFilterChips"></div>
+        </div>
+
+        <!-- Filter & Sort Toolbar -->
+        <div class="filter-toolbar" id="filterToolbar">
+          <div class="filter-group">
+            <label for="filterCategorySelect">Kategoriya:</label>
+            <select id="filterCategorySelect" class="filter-select">
+              <option value="all">Barcha kategoriyalar</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="filterBrandSelect">Brend:</label>
+            <select id="filterBrandSelect" class="filter-select">
+              <option value="all">Barcha brendlar</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="minPriceInput">Narx (so'm):</label>
+            <div class="price-range-inputs">
+              <input type="number" id="minPriceInput" class="filter-number" placeholder="Dan" min="0" step="1000" />
+              <span>—</span>
+              <input type="number" id="maxPriceInput" class="filter-number" placeholder="Gacha" min="0" step="1000" />
+            </div>
+          </div>
+
+          <div class="filter-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="inStockOnlyCheckbox" />
+              <span>Faqat mavjudlari</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="discountOnlyCheckbox" />
+              <span>Faqat aksiyadagilar</span>
+            </label>
+          </div>
+
+          <div class="filter-group">
+            <label for="sortSelect">Saralash:</label>
+            <select id="sortSelect" class="filter-select">
+              <option value="popular">Mashhurlik bo'yicha</option>
+              <option value="price-asc">Arzonidan qimmatiga</option>
+              <option value="price-desc">Qimmatidan arzoniga</option>
+              <option value="rating-desc">Reyting bo'yicha</option>
+              <option value="discount-desc">Chegirma bo'yicha</option>
+            </select>
+          </div>
+
+          <button type="button" class="btn-outline-sm" id="clearAllFiltersBtn">
+            <i class="fa-solid fa-rotate-left"></i> Tozalash
+          </button>
+        </div>
+
+        <!-- Products Grid (with Skeleton Support) -->
+        <div class="products-grid" id="productsGrid"></div>
+
+        <!-- Show More / Pagination -->
+        <div class="load-more-wrap" id="loadMoreWrap">
+          <button type="button" class="btn-secondary" id="toggleShowAllBtn">
+            Barcha mahsulotlarni ko'rsatish
+          </button>
+        </div>
+      </section>
+
+      <!-- Daily Deals & Top Selling Split Section -->
+      <section class="page-section dual-showcase-grid">
+        <div class="showcase-panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-sun"></i> Kun Takliflari</h3>
+            <span class="tag-pill green">Bugun uchun</span>
+          </div>
+          <div class="compact-list" id="dailyDealsList"></div>
+        </div>
+
+        <div class="showcase-panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-crown"></i> Eng Ko'p Sotilganlar</h3>
+            <span class="tag-pill orange">TOP HIT</span>
+          </div>
+          <div class="compact-list" id="topSellingList"></div>
+        </div>
+      </section>
+
+      <!-- New Arrivals & Recommended Section -->
+      <section class="page-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><i class="fa-solid fa-sparkles"></i> Yangi Mahsulotlar va Tavsiyalar</h2>
+            <p class="section-subtitle">Siz uchun maxsus tanlangan yangiliklar va tavsiyalar</p>
+          </div>
+          <div class="tab-switch-group" role="tablist">
+            <button type="button" class="tab-pill active" id="tabNewArrivals">Yangi mahsulotlar</button>
+            <button type="button" class="tab-pill" id="tabRecommended">Tavsiya etilgan</button>
+          </div>
+        </div>
+        <div class="products-grid" id="newAndRecommendedGrid"></div>
+      </section>
+
+      <!-- Brands Strip -->
+      <section class="page-section" id="brandsSection">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><i class="fa-solid fa-certificate"></i> Hamkor Brendlar</h2>
+            <p class="section-subtitle">Brend bo'yicha tezkor filtrlash uchun bosing</p>
+          </div>
+        </div>
+        <div class="brands-grid" id="brandsGrid"></div>
+      </section>
+
+      <!-- Recently Viewed Section -->
+      <section class="page-section hidden" id="recentlyViewedSection">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> So'nggi Ko'rilgan Mahsulotlar</h2>
+            <p class="section-subtitle">Siz yaqinda ko'zdan kechirgan mahsulotlar tarixi</p>
+          </div>
+          <button type="button" class="link-btn" id="clearHistoryBtn">Tarixni tozalash</button>
+        </div>
+        <div class="horizontal-carousel" id="recentlyViewedCarousel"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="container footer-grid">
+      <div class="footer-col">
+        <a href="#home" class="brand-logo footer-logo">
+          <div class="logo-mark">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span class="logo-bolt"><i class="fa-solid fa-bolt"></i></span>
+          </div>
+          <div class="logo-text">
+            <span class="logo-title">FAST <span>MARKET</span></span>
+            <span class="logo-sub">TEZKOR HAYOT TARZI</span>
+          </div>
+        </a>
+        <p class="footer-desc">
+          Sevimli Fast Food taomlaringiz, yangi oziq-ovqatlar, maishiy texnika va elektronika mahsulotlarini bir zumda yetkazib beruvchi zamonaviy marketpleys.
+        </p>
+        <div class="social-links">
+          <a href="#telegram" class="social-circle" onclick="event.preventDefault(); showToast('Telegram kanalimiz: @fastmarket_uz', 'info');" aria-label="Telegram"><i class="fa-brands fa-telegram"></i></a>
+          <a href="#instagram" class="social-circle" onclick="event.preventDefault(); showToast('Instagram sahifamiz: @fastmarket.uz', 'info');" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#youtube" class="social-circle" onclick="event.preventDefault(); showToast('YouTube kanalimiz tez kunda!', 'info');" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Ma'lumotlar</h4>
+        <ul class="footer-links">
+          <li><button type="button" data-open-modal="aboutModal">Biz haqimizda</button></li>
+          <li><button type="button" data-open-modal="deliveryInfoModal">Yetkazib berish shartlari</button></li>
+          <li><button type="button" data-open-modal="privacyModal">Maxfiylik siyosati</button></li>
+          <li><button type="button" data-open-modal="faqModal">Ko'p beriladigan savollar (FAQ)</button></li>
+          <li><button type="button" data-open-modal="contactModal">Biz bilan bog'lanish</button></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Xaridorlarga</h4>
+        <ul class="footer-links">
+          <li><button type="button" id="footerOrdersBtn">Buyurtmalarim va kuzatuv</button></li>
+          <li><button type="button" id="footerWishlistBtn">Sevimli mahsulotlar</button></li>
+          <li><button type="button" id="footerCompareBtn">Mahsulotlarni solishtirish</button></li>
+          <li><button type="button" id="footerProfileBtn">Shaxsiy kabinet va ballar</button></li>
+          <li><button type="button" id="footerAdminBtn">Admin Panel (Demo)</button></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Aloqa va Manzil</h4>
+        <div class="contact-info-list">
+          <p><i class="fa-solid fa-location-dot"></i> Toshkent sh., Amir Temur shoh ko'chasi, 108</p>
+          <p><i class="fa-solid fa-phone"></i> +998 (71) 200-45-67</p>
+          <p><i class="fa-solid fa-envelope"></i> support@fastmarket.uz</p>
+          <p><i class="fa-solid fa-clock"></i> 24/7 — Dam olish kunlarisiz</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <span>&copy; 2026 FAST MARKET. Barcha huquqlar himoyalangan.</span>
+        <div class="payment-badges">
+          <span>Naqd</span>
+          <span>Click</span>
+          <span>Payme</span>
+          <span>Uzum Bank</span>
+          <span>Visa / Mastercard</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobil navigatsiya">
+    <button type="button" class="mob-nav-item active" id="mobHomeBtn">
+      <i class="fa-solid fa-house"></i>
+      <span>Bosh sahifa</span>
+    </button>
+    <button type="button" class="mob-nav-item" id="mobSearchBtn">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <span>Qidiruv</span>
+    </button>
+    <button type="button" class="mob-nav-item" id="mobCartBtn">
+      <i class="fa-solid fa-cart-shopping"></i>
+      <span class="mob-badge" id="mobCartBadge">0</span>
+      <span>Savat</span>
+    </button>
+    <button type="button" class="mob-nav-item" id="mobOrdersBtn">
+      <i class="fa-solid fa-box"></i>
+      <span>Buyurtma</span>
+    </button>
+    <button type="button" class="mob-nav-item" id="mobProfileBtn">
+      <i class="fa-regular fa-user"></i>
+      <span>Profil</span>
+    </button>
+  </nav>
+
+  <!-- Scroll To Top Button -->
+  <button type="button" class="scroll-top-btn hidden" id="scrollTopBtn" title="Yuqoriga qaytish" aria-label="Yuqoriga qaytish">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <!-- Cart Slide-Over Drawer -->
+  <div class="drawer-backdrop hidden" id="cartBackdrop"></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Xarid savati">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <h3>Savatingiz <span id="drawerCartCountText">(0 ta)</span></h3>
+      </div>
+      <div class="drawer-header-actions">
+        <button type="button" class="text-danger-btn" id="clearCartBtn" title="Savatni tozalash">
+          <i class="fa-regular fa-trash-can"></i> Tozalash
+        </button>
+        <button type="button" class="close-icon-btn" id="closeCartBtn" aria-label="Savatni yopish">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="free-delivery-progress" id="freeDeliveryProgress"></div>
+
+    <div class="drawer-body" id="cartItemsContainer"></div>
+
+    <div class="drawer-footer" id="cartFooter">
+      <!-- Promo Code Box -->
+      <div class="promo-box">
+        <input type="text" id="promoCodeInput" class="promo-input" placeholder="Promokod (masalan: FAST20, YANDEX15)" />
+        <button type="button" class="btn-apply-promo" id="applyPromoBtn">Qo'llash</button>
+      </div>
+      <div class="promo-hint" id="promoStatusMsg">
+        Faol kodlar: <code>FAST20</code> (-20%), <code>YANDEX15</code> (-15%), <code>MARKET10</code> (-10%)
+      </div>
+
+      <!-- Totals Breakdown -->
+      <div class="cart-summary-lines">
+        <div class="summary-line">
+          <span>Mahsulotlar summasi:</span>
+          <strong id="cartSubtotal">0 so'm</strong>
+        </div>
+        <div class="summary-line discount-line">
+          <span>Chegirma va promokod:</span>
+          <strong id="cartDiscountAmount">-0 so'm</strong>
+        </div>
+        <div class="summary-line">
+          <span>Yetkazib berish:</span>
+          <strong id="cartDeliveryFee">0 so'm</strong>
+        </div>
+        <div class="summary-line total-line">
+          <span>Jami to'lov:</span>
+          <strong id="cartGrandTotal">0 so'm</strong>
+        </div>
+        <div class="summary-line bonus-earned-line">
+          <span><i class="fa-solid fa-coins"></i> Ushbu buyurtmadan bonus:</span>
+          <strong id="cartEarnedBonus">+0 ball</strong>
+        </div>
+      </div>
+
+      <button type="button" class="btn-primary btn-block btn-lg" id="openCheckoutBtn">
+        <i class="fa-solid fa-bolt"></i> Sotib olish / Buyurtma berish
+      </button>
+    </div>
+  </aside>
+
+  <!-- Product Quick View & Reviews Modal -->
+  <div class="modal-backdrop hidden" id="productDetailModal" role="dialog" aria-modal="true" aria-labelledby="pdTitle">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 id="pdModalHeading">Mahsulot tafsilotlari</h3>
+        <button type="button" class="close-icon-btn" data-close-modal="productDetailModal" aria-label="Yopish">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="productDetailBody"></div>
+    </div>
+  </div>
+
+  <!-- Checkout Modal (Full Order + Geolocation + Leaflet Map + Payment) -->
+  <div class="modal-backdrop hidden" id="checkoutModal" role="dialog" aria-modal="true" aria-labelledby="checkoutHeading">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-header">
+        <h3 id="checkoutHeading"><i class="fa-solid fa-clipboard-check"></i> Buyurtmani Rasmiylashtirish</h3>
+        <button type="button" class="close-icon-btn" data-close-modal="checkoutModal" aria-label="Yopish">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="checkoutForm" class="checkout-grid" novalidate>
+          <div class="checkout-form-col">
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="coFullName">1. Ism va familiya *</label>
+                <input type="text" id="coFullName" class="form-control" placeholder="Masalan: Azizbek Karimov" required />
+              </div>
+              <div class="form-group">
+                <label for="coPhone">2. Telefon raqami (+998) *</label>
+                <input type="tel" id="coPhone" class="form-control" placeholder="+998 (90) 123-45-67" value="+998 " required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="label-with-action">
+                <label for="coAddress">3. Yetkazib berish manzili *</label>
+                <button type="button" class="btn-geo" id="detectLocationBtn">
+                  <i class="fa-solid fa-location-crosshairs"></i> 4. Lokatsiyani aniqlash
+                </button>
+              </div>
+              <input type="text" id="coAddress" class="form-control" placeholder="Ko'cha, uy, xonadon yoki mo'ljalni kiriting" required />
+              <div id="geoStatusBox" class="geo-status-box hidden"></div>
+            </div>
+
+            <!-- Saved Addresses Quick Pick -->
+            <div class="saved-addresses-bar" id="checkoutSavedAddresses"></div>
+
+            <!-- Leaflet Map Picker -->
+            <div class="form-group">
+              <label>5. Xarita orqali manzilni belgilash (OpenStreetMap + Leaflet)</label>
+              <p class="field-hint">Xaritani bosing yoki markerni suring — koordinatalar va manzil avtomatik yangilanadi.</p>
+              <div id="leafletMapContainer" class="leaflet-map-box"></div>
+              <div class="coords-display" id="selectedCoordsText">Koordinatalar: 41.311081, 69.240562 (Toshkent)</div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="coDeliveryTime">7. Yetkazib berish vaqti</label>
+                <select id="coDeliveryTime" class="form-control">
+                  <option value="Imkon qadar tez (25–45 daqiqa)">Imkon qadar tez (25–45 daqiqa)</option>
+                  <option value="Bugun, 12:00 – 15:00">Bugun, 12:00 – 15:00</option>
+                  <option value="Bugun, 15:00 – 18:00">Bugun, 15:00 – 18:00</option>
+                  <option value="Bugun, 18:00 – 21:00">Bugun, 18:00 – 21:00</option>
+                  <option value="Ertaga, 09:00 – 12:00">Ertaga, 09:00 – 12:00</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="coUseBonus">Bonus ballardan foydalanish</label>
+                <input type="number" id="coUseBonus" class="form-control" min="0" value="0" step="100" />
+                <small class="field-hint" id="availableBonusHint">Mavjud: 0 ball (1 ball = 1 so'm)</small>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="coNote">6. Buyurtma izohi (kuryer uchun)</label>
+              <textarea id="coNote" class="form-control" rows="2" placeholder="Domofon kodi, qavat, achchiq/achchiq emas yoki qo'shimcha iltimos..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>8. To'lov turi (Demo rejim) *</label>
+              <div class="payment-methods-grid" id="paymentMethodsGrid">
+                <label class="payment-option active">
+                  <input type="radio" name="paymentMethod" value="Naqd pul" checked />
+                  <i class="fa-solid fa-money-bill-wave"></i>
+                  <span>Naqd pul</span>
+                </label>
+                <label class="payment-option">
+                  <input type="radio" name="paymentMethod" value="Click" />
+                  <i class="fa-solid fa-mobile-screen-button"></i>
+                  <span>Click</span>
+                </label>
+                <label class="payment-option">
+                  <input type="radio" name="paymentMethod" value="Payme" />
+                  <i class="fa-solid fa-credit-card"></i>
+                  <span>Payme</span>
+                </label>
+                <label class="payment-option">
+                  <input type="radio" name="paymentMethod" value="Uzum Bank" />
+                  <i class="fa-solid fa-building-columns"></i>
+                  <span>Uzum Bank</span>
+                </label>
+                <label class="payment-option">
+                  <input type="radio" name="paymentMethod" value="Karta orqali" />
+                  <i class="fa-regular fa-credit-card"></i>
+                  <span>Karta orqali</span>
+                </label>
+              </div>
+              <div class="demo-payment-note" id="demoPaymentNote">
+                <i class="fa-solid fa-circle-info"></i>
+                <span><strong>Demo rejim:</strong> Real bank/to'lov shlyuzi ulanmagan. Buyurtma tasdiqlangach "Kutilmoqda / Demo to'lov" holatida ro'yxatga olinadi.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Checkout Order Summary Side -->
+          <aside class="checkout-summary-col" id="checkoutSummaryBox"></aside>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Success & Tracker Modal -->
+  <div class="modal-backdrop hidden" id="orderSuccessModal" role="dialog" aria-modal="true" aria-labelledby="orderSuccessHeading">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 id="orderSuccessHeading"><i class="fa-solid fa-circle-check text-success"></i> Buyurtma Tafsilotlari va Kuzatuv</h3>
+        <button type="button" class="close-icon-btn" data-close-modal="orderSuccessModal" aria-label="Yopish">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="orderSuccessBody"></div>
+    </div>
+  </div>
+
+  <!-- Orders History Modal -->
+  <div class="modal-backdrop hidden" id="ordersHistoryModal" role="dialog" aria-modal="true" aria-labelledby="ordersHistoryHeading">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 id="ordersHistoryHeading"><i class="fa-solid fa-box-open"></i> Buyurtmalar Tarixi va Holati</h3>
+        <button type="button" class="close-icon-btn" data-close-modal="ordersHistoryModal" aria-label="Yopish">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="ordersHistoryBody"></div>
+    </div>
+  </div>
+
+  <!-- Wishlist Modal -->
+  <div class="modal-backdrop hidden" id="wishlistModal" role="dialog" aria-modal="true" aria-labelledby="wishlistHeading">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <h3 id="wishlistHeading"><i class="fa-solid fa-heart text-danger"></i> Sevimli Mahsulotlar</h3>
+        <button type="button" class="close-icon-btn" data-close-modal="wishlistModal" aria-label="Yopish">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="wishlistBody"></div>
+    </div>
+  </div>
+
+  <!-- Compare Modal -->
+  <div class="modal-backdrop hidden" id="compareModal" role="dialog" aria-modal="true" aria-labelledby="compareHeading">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-header">
+        <h3 id="compareHeading"><i class="fa-solid fa-scale-balanced"></i> Mahsulotlarni Solishtirish</h3>
+        <div class="modal-header-right">
+          <button type="button" class="btn-outline-sm" id="clearCompareBtn">Ro'yxatni tozalash</button>
+          <button type="button" class="close-icon-btn" data-close-modal="compareModal" aria-label="Yopish">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body" id="compareBody"></div>
+    </div>
+  </div>
+
+  <!-- User Profile Modal -->
+  <div class="modal-backdrop hidden" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileHeading">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-header">
+        <h3 id="profileHeading"><i class="fa-solid fa-user-gear"></i> Foydalanuvchi Profili</h3>
+        <button type="button" class="close-icon-btn" data-close-modal="profileModal" aria-label="Yopish">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="profileBody"></div>
+    </div>
+  </div>
+
+  <!-- Referral Modal -->
+  <div class="modal-backdrop hidden" id="referralModal" role="dialog" aria-modal="true" aria-labelledby="referralHeading">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3 id="referralHeading"><i class="fa-solid fa-user-plus"></i> Do'stlarni Taklif Qilish (Referral)</h3>
+        <button type="button" class="close-icon-btn" data-close-modal="referralModal" aria-label="Yopish">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="referralBody"></div>
+    </div>
+  </div>
+
+  <!-- Admin Panel Modal -->
+  <div class="modal-backdrop hidden" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminHeading">
+    <div class="modal-dialog modal-xxl">
+      <div class="modal-header admin-modal-header">
+        <div>
+          <h3 id="adminHeading"><i class="fa-solid fa-shield-halved"></i> FAST MARKET — Admin Panel (Demo)</h3>
+          <small class="admin-security-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i> Diqqat: Bu faqat frontend demo panel. Haqiqiy xavfsizlik, parol shifrlash va bazani saqlash uchun Backend zarur.
+          </small>
+        </div>
+        <button type="button" class="close-icon-btn" data-close-modal="adminModal" aria-label="Yopish">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="adminBody"></div>
+    </div>
+  </div>
+
+  <!-- Info Modals (About, Delivery, Privacy, FAQ, Contact) -->
+  <div class="modal-backdrop hidden" id="aboutModal" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-circle-info"></i> Biz Haqimizda</h3>
+        <button type="button" class="close-icon-btn" data-close-modal="aboutModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body info-modal-content">
+        <p><strong>FAST MARKET</strong> — tezkor taomlar (Fast Food, Lavash, Burger, Pizza, Sushi), kundalik oziq-ovqatlar, meva-sabzavotlar hamda maishiy texnika va elektronika mahsulotlarini bir ilovada birlashtirgan zamonaviy platforma.</p>
+        <p>Bizning maqsadimiz — xaridorlarga vaqt tejash, halol narxlar, muntazam aksiyalar va tezkor kuryer xizmatini taqdim etish.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="deliveryInfoModal" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-truck-fast"></i> Yetkazib Berish Shartlari</h3>
+        <button type="button" class="close-icon-btn" data-close-modal="deliveryInfoModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body info-modal-content">
+        <ul>
+          <li><strong>Tezkor yetkazish:</strong> 25–45 daqiqa ichida.</li>
+          <li><strong>Yetkazib berish narxi:</strong> 15,000 so'm. <strong>150,000 so'm</strong> va undan yuqori buyurtmalarga <strong>BEPUL</strong>.</li>
+          <li><strong>Manzil va lokatsiya:</strong> GPS lokatsiya yoki OpenStreetMap xaritasi orqali aniq nuqtani belgilashingiz mumkin.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="privacyModal" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-user-shield"></i> Maxfiylik Siyosati</h3>
+        <button type="button" class="close-icon-btn" data-close-modal="privacyModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body info-modal-content">
+        <p>Foydalanuvchi ma'lumotlari (ism, telefon raqami, manzil, savat va buyurtmalar tarixi) ushbu demo versiyada brauzeringizning <strong>LocalStorage</strong> xotirasida saqlanadi.</p>
+        <p>Tijoriy maqsadlarda uchinchi shaxslarga uzatilmaydi. Production muhitida ma'lumotlar shifrlangan server bazasida himoyalanadi.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="faqModal" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-circle-question"></i> Ko'p Beriladigan Savollar (FAQ)</h3>
+        <button type="button" class="close-icon-btn" data-close-modal="faqModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body info-modal-content">
+        <div class="faq-item">
+          <strong>1. Promokodni qanday ishlataman?</strong>
+          <p>Savatni oching, promokod maydoniga <code>FAST20</code>, <code>YANDEX15</code> yoki <code>MARKET10</code> deb yozing va "Qo'llash" tugmasini bosing.</p>
+        </div>
+        <div class="faq-item">
+          <strong>2. Bonus ballar qanday hisoblanadi?</strong>
+          <p>Har bir buyurtma summasining 5% miqdorida bonus ball beriladi. Keyingi buyurtmada 1 ball = 1 so'm hisobida ishlatish mumkin.</p>
+        </div>
+        <div class="faq-item">
+          <strong>3. To'lov turlari haqiqiymi?</strong>
+          <p>Ushbu demo ilovada to'lov usullari simulyatsiya (demo) rejimida ishlaydi.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="contactModal" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-headset"></i> Biz Bilan Bog'lanish</h3>
+        <button type="button" class="close-icon-btn" data-close-modal="contactModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="contactForm" class="stack-form">
+          <div class="form-group">
+            <label for="contactName">Ismingiz</label>
+            <input type="text" id="contactName" class="form-control" placeholder="Ismingizni kiriting" required />
+          </div>
+          <div class="form-group">
+            <label for="contactPhone">Telefon yoki Email</label>
+            <input type="text" id="contactPhone" class="form-control" placeholder="+998 90 ... yoki email" required />
+          </div>
+          <div class="form-group">
+            <label for="contactMessage">Xabaringiz</label>
+            <textarea id="contactMessage" class="form-control" rows="3" placeholder="Savol yoki taklifingizni yozing..." required></textarea>
+          </div>
+          <button type="submit" class="btn-primary btn-block">Xabar yuborish</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications Container -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- Flying Item Animation Layer -->
+  <div id="flyAnimationLayer" class="fly-layer"></div>
+
+  <!-- Leaflet JS & App Logic -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
